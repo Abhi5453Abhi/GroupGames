@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAudioRecorder } from '../hooks/useAudioRecorder';
+import { GPT5Service } from '../services/gpt5Service';
 
 interface CategoryPlayProps {
   prompts: string[];
@@ -37,6 +39,24 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
   });
   const [teamScores, setTeamScores] = useState({ team1: 0, team2: 0 });
   const [showVoting, setShowVoting] = useState(false);
+  
+  // Audio recording state
+  const [isScoring, setIsScoring] = useState(false);
+  const [lastScore, setLastScore] = useState<number | null>(null);
+  const [showScoreResult, setShowScoreResult] = useState(false);
+  const [scoreDetails, setScoreDetails] = useState<string>('');
+  const [detectedAnswers, setDetectedAnswers] = useState<string[]>([]);
+  
+  // Audio recorder hook
+  const { 
+    isRecording, 
+    audioBlob, 
+    recordingTime, 
+    error: recordingError, 
+    startRecording, 
+    stopRecording, 
+    resetRecording 
+  } = useAudioRecorder();
 
   const selectRandomPrompt = () => {
     const availablePrompts = prompts.filter(p => !usedPrompts.includes(p));
@@ -57,6 +77,86 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
     selectRandomPrompt();
   }, [currentRound]);
 
+  const startTimer = async () => {
+    console.log('🎬 Starting timer and recording...');
+    setIsTimerRunning(true);
+    try {
+      await startRecording();
+      console.log('✅ Recording started successfully');
+    } catch (error) {
+      console.error('❌ Failed to start recording:', error);
+    }
+  };
+
+  const scoreRound = useCallback(async () => {
+    console.log('🎯 scoreRound called');
+    console.log('   Audio blob exists:', !!audioBlob);
+    console.log('   Current prompt:', currentPrompt);
+    
+    if (!audioBlob || !currentPrompt) {
+      console.error('❌ No audio or prompt available for scoring');
+      console.log('   Audio blob size:', audioBlob?.size || 'N/A');
+      console.log('   Current prompt:', currentPrompt || 'N/A');
+      
+      // Show fallback data for testing
+      console.log('🔄 Using fallback data...');
+      const mockAnswers = ["Pizza", "Burger", "Tacos", "Sushi"];
+      setLastScore(4);
+      setScoreDetails("Fallback data - no audio recorded");
+      setDetectedAnswers(mockAnswers);
+      setShowScoreResult(true);
+      
+      setTimeout(() => {
+        setShowScoreResult(false);
+        setShowVoting(true);
+      }, 3000);
+      return;
+    }
+
+    console.log('🤖 Starting AI scoring...');
+    setIsScoring(true);
+    try {
+      const result = await GPT5Service.scoreRound(audioBlob, currentPrompt);
+      console.log('✅ AI scoring completed:', result);
+      setLastScore(result.score);
+      setScoreDetails(result.details);
+      setDetectedAnswers(result.detectedAnswers);
+      setShowScoreResult(true);
+      
+      // Auto-advance after showing result for 3 seconds
+      setTimeout(() => {
+        setShowScoreResult(false);
+        setShowVoting(true);
+      }, 3000);
+    } catch (error) {
+      console.error('Scoring failed:', error);
+      
+      // Fallback: Show mock data for testing when AI fails
+      const mockAnswers = [
+        "Sample Answer 1",
+        "Sample Answer 2", 
+        "Sample Answer 3",
+        "Sample Answer 4"
+      ];
+      
+      setLastScore(4);
+      setScoreDetails("AI scoring unavailable - showing sample data");
+      setDetectedAnswers(mockAnswers);
+      setShowScoreResult(true);
+      
+      // Auto-advance after showing result for 3 seconds
+      setTimeout(() => {
+        setShowScoreResult(false);
+        setShowVoting(true);
+      }, 3000);
+    } finally {
+      setIsScoring(false);
+    }
+  }, [audioBlob, currentPrompt, setLastScore, setScoreDetails, setDetectedAnswers, setShowScoreResult, setShowVoting, setIsScoring]);
+
+  // Track when recording should stop and be scored
+  const [shouldScore, setShouldScore] = useState(false);
+
   useEffect(() => {
     if (isTimerRunning && timeLeft > 0) {
       const timer = setTimeout(() => {
@@ -64,14 +164,21 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
       }, 1000);
       return () => clearTimeout(timer);
     } else if (timeLeft === 0 && isTimerRunning) {
+      console.log('⏰ Timer ended! Stopping recording...');
       setIsTimerRunning(false);
-      setShowVoting(true);
+      stopRecording();
+      setShouldScore(true);
     }
-  }, [isTimerRunning, timeLeft]);
+  }, [isTimerRunning, timeLeft, stopRecording]);
 
-  const startTimer = () => {
-    setIsTimerRunning(true);
-  };
+  // Wait for audioBlob to be ready, then score
+  useEffect(() => {
+    if (shouldScore && !isRecording && audioBlob) {
+      console.log('⏰ Audio blob ready! Starting scoring process...');
+      setShouldScore(false);
+      scoreRound();
+    }
+  }, [shouldScore, isRecording, audioBlob, scoreRound]);
 
   const handleVote = (playerName: string) => {
     const newScores = { ...scores, [playerName]: scores[playerName] + 1 };
@@ -94,6 +201,11 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
       setTimeLeft(timePerRound);
       setIsTimerRunning(false);
       setShowVoting(false);
+      // Reset audio recording state for next round
+      setLastScore(null);
+      setDetectedAnswers([]);
+      setScoreDetails('');
+      resetRecording();
     }
   };
 
@@ -113,6 +225,11 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
       setTimeLeft(timePerRound);
       setIsTimerRunning(false);
       setShowVoting(false);
+      // Reset audio recording state for next round
+      setLastScore(null);
+      setDetectedAnswers([]);
+      setScoreDetails('');
+      resetRecording();
     }
   };
 
@@ -124,6 +241,11 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
       setTimeLeft(timePerRound);
       setIsTimerRunning(false);
       setShowVoting(false);
+      // Reset audio recording state for next round
+      setLastScore(null);
+      setDetectedAnswers([]);
+      setScoreDetails('');
+      resetRecording();
     }
   };
 
@@ -146,6 +268,43 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
             <h2 className="text-3xl font-bold text-white mb-4">Vote for the Best!</h2>
             <p className="text-gray-300">{isTeamMode ? 'Which team had the funniest answer?' : 'Who had the funniest answer?'}</p>
           </div>
+
+          {/* AI Detected Answers */}
+          {lastScore !== null && detectedAnswers.length > 0 && (
+            <div className="mb-8 bg-gradient-to-br from-purple-900 to-indigo-900 rounded-2xl p-6 border-2 border-purple-500 shadow-lg">
+              <div className="text-center mb-4">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-3">
+                  <span className="text-3xl">🤖</span>
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">AI Detected Answers</h3>
+                <div className="inline-block bg-green-500 bg-opacity-20 rounded-full px-4 py-2 border border-green-400">
+                  <span className="text-green-300 font-bold text-lg">{lastScore} Correct Answer{lastScore !== 1 ? 's' : ''}</span>
+                </div>
+              </div>
+
+              <div className="bg-black bg-opacity-30 rounded-xl p-4 mb-3">
+                <h4 className="text-purple-300 font-semibold text-sm mb-3 text-center">Relevant Words/Phrases:</h4>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {detectedAnswers.map((answer, index) => (
+                    <div 
+                      key={index}
+                      className="bg-purple-600 bg-opacity-50 rounded-lg px-3 py-2 border border-purple-400"
+                    >
+                      <span className="text-white font-medium text-sm">
+                        {index + 1}. {answer}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="text-center">
+                <p className="text-purple-200 text-xs italic">
+                  💡 Now vote for who said it best!
+                </p>
+              </div>
+            </div>
+          )}
 
           {isTeamMode ? (
             <div className="space-y-4 mb-6">
@@ -210,8 +369,95 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
               {formatTime(timeLeft)}
             </span>
           </div>
+          
+          {/* Recording indicator */}
+          {isRecording && (
+            <div className="absolute -top-2 -right-2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+              <div className="w-4 h-4 bg-white rounded-full"></div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Recording status */}
+      {isRecording && (
+        <div className="text-center mb-6">
+          <div className="bg-red-900 bg-opacity-30 rounded-xl p-4 border border-red-500">
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+              <span className="text-red-300 font-semibold">Recording... {recordingTime.toFixed(1)}s</span>
+            </div>
+            <p className="text-red-200 text-sm mt-2">AI is listening for answers!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Scoring status */}
+      {isScoring && (
+        <div className="text-center mb-6">
+          <div className="bg-blue-900 bg-opacity-30 rounded-xl p-4 border border-blue-500">
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-blue-300 font-semibold">AI is scoring your answers...</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Score result */}
+      {showScoreResult && lastScore !== null && (
+        <div className="text-center mb-6">
+          <div className="bg-green-900 bg-opacity-30 rounded-xl p-6 border border-green-500">
+            <div className="text-4xl mb-3">🎉</div>
+            <h3 className="text-green-300 font-bold text-xl mb-2">Round Complete!</h3>
+            <div className="text-white text-3xl font-bold mb-2">{lastScore} correct answers</div>
+            <p className="text-green-200 text-sm">{scoreDetails}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Recording error */}
+      {recordingError && (
+        <div className="text-center mb-6">
+          <div className="bg-red-900 bg-opacity-30 rounded-xl p-4 border border-red-500">
+            <p className="text-red-300 font-semibold">Recording Error: {recordingError}</p>
+            <p className="text-red-200 text-sm mt-2">Manual voting will be available</p>
+          </div>
+        </div>
+      )}
+
+      {/* Test buttons for debugging (remove in production) */}
+      {!isTimerRunning && !showVoting && (
+        <div className="text-center mb-6 space-x-2">
+          <button 
+            onClick={() => {
+              console.log('🧪 Manual test triggered');
+              const mockAnswers = ["Pizza", "Burger", "Tacos", "Sushi", "Pasta"];
+              setLastScore(5);
+              setScoreDetails("Test data - AI detected these answers");
+              setDetectedAnswers(mockAnswers);
+              setShowScoreResult(true);
+              setTimeout(() => {
+                setShowScoreResult(false);
+                setShowVoting(true);
+              }, 3000);
+            }}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg text-sm font-semibold"
+          >
+            🧪 Test Display
+          </button>
+          
+          <button 
+            onClick={() => {
+              console.log('🎯 Manual scoreRound triggered');
+              scoreRound();
+            }}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold"
+          >
+            🎯 Test Scoring
+          </button>
+        </div>
+      )}
 
       <div className="flex-1 flex items-center justify-center mb-8">
         <div className="w-full max-w-md">
