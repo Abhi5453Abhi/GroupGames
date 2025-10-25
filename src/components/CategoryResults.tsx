@@ -101,3 +101,6 @@ const CategoryResults: React.FC<CategoryResultsProps> = ({
 
 export default CategoryResults;
 
+
+
+

@@ -35,9 +35,29 @@ export const useAudioRecorder = () => {
       
       streamRef.current = stream;
       
-      // Create MediaRecorder with high quality settings
+      // Create MediaRecorder with compatible settings
+      let mimeType = 'audio/webm;codecs=opus';
+      
+      // Check for better supported formats in order of preference
+      const preferredTypes = [
+        'audio/wav',
+        'audio/mp4',
+        'audio/mpeg',
+        'audio/ogg',
+        'audio/webm',
+        'audio/webm;codecs=opus'
+      ];
+      
+      for (const type of preferredTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          mimeType = type;
+          console.log('🎤 Using audio format:', mimeType);
+          break;
+        }
+      }
+      
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus', // Best format for web
+        mimeType: mimeType,
       });
       
       mediaRecorderRef.current = mediaRecorder;
@@ -51,7 +71,7 @@ export const useAudioRecorder = () => {
 
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { 
-          type: 'audio/webm;codecs=opus' 
+          type: mimeType 
         });
         setState(prev => ({ ...prev, audioBlob }));
       };
@@ -119,3 +139,4 @@ export const useAudioRecorder = () => {
     resetRecording,
   };
 };
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MainMenu from './components/MainMenu';
 import GameSetup from './components/GameSetup';
 import PlayerOverview from './components/PlayerOverview';
@@ -8,6 +8,7 @@ import ResultsScreen from './components/ResultsScreen';
 import CategoryGameSetup from './components/CategoryGameSetup';
 import CategoryPlay from './components/CategoryPlay';
 import CategoryResults from './components/CategoryResults';
+import { getRandomWordFromCategory, getHintForDifficulty, HintDifficulty } from './data/wordsByCategory';
 
 export type GameState = 
   | 'main-menu'
@@ -34,6 +35,7 @@ export interface GameConfig {
   imposterCount: number;
   showCategoryToImposter: boolean;
   showHintToImposter: boolean;
+  hintDifficulty: HintDifficulty;
   selectedCategories?: string[];
   playerNames?: string[];
 }
@@ -57,6 +59,7 @@ function App() {
       imposterCount: 1,
       showCategoryToImposter: false,
       showHintToImposter: true,
+      hintDifficulty: 'medium',
     };
   });
   
@@ -95,7 +98,7 @@ function App() {
     setGameHint('');
   };
 
-  const initializePlayersFromConfig = () => {
+  const initializePlayersFromConfig = (): Player[] => {
     // Always read fresh player names from localStorage
     const saved = localStorage.getItem('imposter-player-names');
     let playerNamesFromStorage: string[] = [];
@@ -118,6 +121,7 @@ function App() {
       votes: 0,
     }));
     setPlayers(initialPlayers);
+    return initialPlayers;
   };
 
   const startImposterGame = () => {
@@ -129,7 +133,17 @@ function App() {
     setGameState('word-reveal');
   };
 
-  const initializeGameWords = () => {
+  const initializeGameWords = useCallback((playersToUse?: Player[]) => {
+    const currentPlayers = playersToUse || players;
+    
+    // Check if we have players
+    if (currentPlayers.length === 0) {
+      console.error('No players available for game initialization');
+      return;
+    }
+    
+    console.log('Initializing game words with', currentPlayers.length, 'players');
+    
     // Get words from selected categories only
     const selectedCategories = gameConfig.selectedCategories || [
       'Bollywood Movies', 'Food', 'Cricket', 'Cities', 'Festivals'
@@ -139,48 +153,54 @@ function App() {
     const shuffledCategories = [...selectedCategories].sort(() => Math.random() - 0.5);
     const selectedCategory = shuffledCategories[0];
     
-    // Import the words data (we'll need to pass this from WordReveal or create a shared constant)
-    // For now, let's use a simple approach
-    const wordsByCategory: { [key: string]: { word: string; hint: string }[] } = {
-      'Bollywood Movies': [
-        { word: 'Dilwale Dulhania Le Jayenge', hint: 'King of Romance' },
-        { word: 'Sholay', hint: 'Gabbar Singh' },
-        { word: 'Lagaan', hint: 'Cricket in British India' },
-        { word: '3 Idiots', hint: 'Engineering College' },
-        { word: 'Dangal', hint: 'Wrestling Sisters' }
-      ],
-      'Food': [
-        { word: 'Biryani', hint: 'Rice with Meat' },
-        { word: 'Samosa', hint: 'Triangular Snack' },
-        { word: 'Butter Chicken', hint: 'Creamy Tomato Curry' },
-        { word: 'Masala Dosa', hint: 'South Indian Crepe' },
-        { word: 'Rogan Josh', hint: 'Red Curry' }
-      ],
-      'Cricket': [
-        { word: 'Sachin Tendulkar', hint: 'God of Cricket' },
-        { word: 'Virat Kohli', hint: 'Run Machine' },
-        { word: 'MS Dhoni', hint: 'Captain Cool' },
-        { word: 'Rohit Sharma', hint: 'Hitman' },
-        { word: 'Kapil Dev', hint: 'World Cup 1983' }
-      ]
-    };
+    // Get a random word from the selected category using the shared data
+    const selectedWordData = getRandomWordFromCategory(selectedCategory);
     
-    // Get words from that specific category
-    const categoryWords = wordsByCategory[selectedCategory] || wordsByCategory['Bollywood Movies'];
-    
-    // Shuffle and select a word from the selected category
-    const shuffledWords = [...categoryWords].sort(() => Math.random() - 0.5);
-    const selectedWordData = shuffledWords[0];
+    if (!selectedWordData) {
+      console.error('No words found for category:', selectedCategory);
+      // Fallback to a default category
+      const fallbackData = getRandomWordFromCategory('Bollywood Movies');
+      if (!fallbackData) {
+        throw new Error('No words available in any category');
+      }
+      const selectedWord = fallbackData.word;
+      const selectedHint = getHintForDifficulty(fallbackData, gameConfig.hintDifficulty);
+      
+      // Assign imposters randomly
+      const shuffledPlayers = [...currentPlayers].sort(() => Math.random() - 0.5);
+      console.log('FALLBACK - Players:', currentPlayers.length);
+      console.log('FALLBACK - Imposter count:', gameConfig.imposterCount);
+      console.log('FALLBACK - Shuffled players:', shuffledPlayers.map(p => p.name));
+      
+      currentPlayers.forEach(player => {
+        const isImposter = shuffledPlayers.slice(0, gameConfig.imposterCount).some(p => p.id === player.id);
+        player.isImposter = isImposter;
+        player.word = isImposter ? (gameConfig.showCategoryToImposter ? 'Bollywood Movies' : 'IMPOSTER') : selectedWord;
+        console.log(`FALLBACK - Player ${player.name}: isImposter=${isImposter}, word=${player.word}`);
+      });
+      
+      // Store the selected word and hint for the game
+      setSecretWord(selectedWord);
+      setGameWord(selectedWord);
+      setGameHint(selectedHint);
+      
+      return { selectedWord, selectedHint, selectedCategory: 'Bollywood Movies' };
+    }
     
     const selectedWord = selectedWordData.word;
-    const selectedHint = selectedWordData.hint;
+    const selectedHint = getHintForDifficulty(selectedWordData, gameConfig.hintDifficulty);
     
     // Assign imposters randomly
-    const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
-    players.forEach(player => {
+    const shuffledPlayers = [...currentPlayers].sort(() => Math.random() - 0.5);
+    console.log('Players:', currentPlayers.length);
+    console.log('Imposter count:', gameConfig.imposterCount);
+    console.log('Shuffled players:', shuffledPlayers.map(p => p.name));
+    
+    currentPlayers.forEach(player => {
       const isImposter = shuffledPlayers.slice(0, gameConfig.imposterCount).some(p => p.id === player.id);
       player.isImposter = isImposter;
       player.word = isImposter ? (gameConfig.showCategoryToImposter ? selectedCategory : 'IMPOSTER') : selectedWord;
+      console.log(`Player ${player.name}: isImposter=${isImposter}, word=${player.word}`);
     });
     
     // Store the selected word and hint for the game
@@ -189,7 +209,7 @@ function App() {
     setGameHint(selectedHint);
     
     return { selectedWord, selectedHint, selectedCategory };
-  };
+  }, [players, gameConfig]);
 
   const startCategoryGame = () => {
     setGameState('category-setup');
@@ -210,10 +230,10 @@ function App() {
             gameConfig={gameConfig}
             onConfigChange={setGameConfig}
             onStartGame={() => {
-              // Initialize players from config and go to player overview
-              initializePlayersFromConfig();
+              // Initialize players from config
+              const playersArray = initializePlayersFromConfig();
               // Initialize game words (select word and assign imposters)
-              initializeGameWords();
+              initializeGameWords(playersArray);
               setGameState('player-overview');
             }}
             onBack={() => setGameState('main-menu')}

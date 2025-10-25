@@ -235,3 +235,6 @@ const MainMenu: React.FC<MainMenuProps> = ({ onStartImposter, onStartCategory })
 
 export default MainMenu;
 
+
+
+

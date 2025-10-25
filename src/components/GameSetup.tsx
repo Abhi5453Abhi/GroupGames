@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { GameConfig } from '../App';
+import { HintDifficulty } from '../data/wordsByCategory';
 
 interface GameSetupProps {
   gameConfig: GameConfig;
@@ -11,7 +12,7 @@ interface GameSetupProps {
 const ALL_CATEGORIES = [
   'Bollywood Movies', 'Food', 'Cricket', 'Cities', 'Festivals',
   'Sweets', 'Bollywood Actors', 'States', 'Street Food', 'Traditions',
-  'Songs', 'Monuments', 'Games', 'Clothing', 'Brands',
+  'Songs', 'Monuments', 'Games', 'Brands',
   'TV Shows', 'Mythology', 'Languages', 'Dance Forms', 'Spices'
 ];
 
@@ -36,17 +37,14 @@ const GameSetup: React.FC<GameSetupProps> = ({
     return ['Bollywood Movies', 'Food', 'Cricket', 'Cities', 'Festivals'];
   });
   
+  const updateConfig = useCallback((updates: Partial<GameConfig>) => {
+    onConfigChange({ ...gameConfig, ...updates });
+  }, [gameConfig, onConfigChange]);
+
   // Save selected categories to localStorage whenever they change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     localStorage.setItem('imposter-selected-categories', JSON.stringify(selectedCategories));
-    // Also update the game config
-    updateConfig({ selectedCategories });
   }, [selectedCategories]);
-
-  const updateConfig = (updates: Partial<GameConfig>) => {
-    onConfigChange({ ...gameConfig, ...updates });
-  };
 
   const toggleCategory = (category: string) => {
     setSelectedCategories(prev => 
@@ -57,7 +55,7 @@ const GameSetup: React.FC<GameSetupProps> = ({
   };
 
   const handleCategorySelection = () => {
-    updateConfig({ selectedCategories });
+    onConfigChange({ ...gameConfig, selectedCategories });
     setShowCategoryModal(false);
   };
 
@@ -222,6 +220,38 @@ const GameSetup: React.FC<GameSetupProps> = ({
               }`}></div>
             </button>
           </div>
+
+          {/* Hint Difficulty Selection */}
+          {gameConfig.showHintToImposter && (
+            <div className="bg-card-bg rounded-2xl p-4 border border-purple-glow">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-8 h-8 bg-accent-purple rounded-lg flex items-center justify-center">
+                  <span className="text-white">🎯</span>
+                </div>
+                <span className="text-white font-medium">Hint Difficulty</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {(['easy', 'medium', 'hard'] as HintDifficulty[]).map((difficulty) => (
+                  <button
+                    key={difficulty}
+                    onClick={() => updateConfig({ hintDifficulty: difficulty })}
+                    className={`p-3 rounded-xl text-center transition-all duration-300 ${
+                      gameConfig.hintDifficulty === difficulty
+                        ? 'bg-gradient-to-r from-accent-purple to-light-purple text-white border border-purple-glow'
+                        : 'bg-gray-700 text-gray-300 border border-gray-600 hover:border-purple-glow'
+                    }`}
+                  >
+                    <div className="text-sm font-semibold capitalize">{difficulty}</div>
+                    <div className="text-xs opacity-80 mt-1">
+                      {difficulty === 'easy' && 'Clear hints'}
+                      {difficulty === 'medium' && 'Moderate hints'}
+                      {difficulty === 'hard' && 'Subtle hints'}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -292,4 +322,5 @@ const GameSetup: React.FC<GameSetupProps> = ({
 };
 
 export default GameSetup;
+
 

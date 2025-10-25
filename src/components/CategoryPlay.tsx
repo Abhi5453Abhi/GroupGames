@@ -29,7 +29,7 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
   const [currentPrompt, setCurrentPrompt] = useState('');
   const [timeLeft, setTimeLeft] = useState(timePerRound);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [usedPrompts, setUsedPrompts] = useState<string[]>([]);
+  const [, setUsedPrompts] = useState<string[]>([]);
   const [scores, setScores] = useState<{ [playerName: string]: number }>(() => {
     const initialScores: { [playerName: string]: number } = {};
     players.forEach(player => {
@@ -58,24 +58,24 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
     resetRecording 
   } = useAudioRecorder();
 
-  const selectRandomPrompt = () => {
-    const availablePrompts = prompts.filter(p => !usedPrompts.includes(p));
-    if (availablePrompts.length === 0) {
-      setUsedPrompts([]);
-      const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-      setCurrentPrompt(randomPrompt);
-      setUsedPrompts([randomPrompt]);
-    } else {
-      const randomPrompt = availablePrompts[Math.floor(Math.random() * availablePrompts.length)];
-      setCurrentPrompt(randomPrompt);
-      setUsedPrompts([...usedPrompts, randomPrompt]);
-    }
-  };
+  const selectRandomPrompt = useCallback(() => {
+    setUsedPrompts(prevUsedPrompts => {
+      const availablePrompts = prompts.filter(p => !prevUsedPrompts.includes(p));
+      if (availablePrompts.length === 0) {
+        const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+        setCurrentPrompt(randomPrompt);
+        return [randomPrompt];
+      } else {
+        const randomPrompt = availablePrompts[Math.floor(Math.random() * availablePrompts.length)];
+        setCurrentPrompt(randomPrompt);
+        return [...prevUsedPrompts, randomPrompt];
+      }
+    });
+  }, [prompts]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     selectRandomPrompt();
-  }, [currentRound]);
+  }, [currentRound, selectRandomPrompt]);
 
   const startTimer = async () => {
     console.log('🎬 Starting timer and recording...');
@@ -92,6 +92,8 @@ const CategoryPlay: React.FC<CategoryPlayProps> = ({
     console.log('🎯 scoreRound called');
     console.log('   Audio blob exists:', !!audioBlob);
     console.log('   Current prompt:', currentPrompt);
+    console.log('   Audio blob size:', audioBlob?.size || 'N/A');
+    console.log('   Audio blob type:', audioBlob?.type || 'N/A');
     
     if (!audioBlob || !currentPrompt) {
       console.error('❌ No audio or prompt available for scoring');

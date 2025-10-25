@@ -17,93 +17,93 @@ interface CategoryGameSetupProps {
 }
 
 const ALL_CATEGORY_PROMPTS = [
-  // Situational - Double Meaning
-  'Things you can say at the gym AND in bed',
-  'Things you can say to a barista AND to your date',
-  'Things you can say to your pet AND to your partner',
-  'Things you can say during yoga AND during foreplay',
-  'Things you can say to a mechanic AND to a lover',
-  'Things you can say at a buffet AND under the sheets',
-  'Things you can say on an airplane AND on a first date',
+  // Desi Double Meaning (Hindi/Punjabi)
+  'Things you can say to a dhaba owner AND to your girlfriend',
+  'Things you can say at a wedding AND in bed',
+  'Things you can say to your mom AND to your crush',
+  'Things you can say during cricket match AND during foreplay',
+  'Things you can say to an auto driver AND to your date',
+  'Things you can say at a temple AND under the sheets',
+  'Things you can say during Diwali AND during a make-out',
   'Things you can say to your boss AND to your ex',
-  'Things you can say about a haircut AND about a hookup',
-  'Things you can say during a massage AND during a make-out',
+  'Things you can say about biryani AND about a hookup',
+  'Things you can say during Holi AND during foreplay',
   
-  // Taboo but funny
-  'Things you can\'t use as lube',
-  'Safe words that would actually make it worse',
-  'Places that are definitely not romantic',
-  'Texts that should never be sent after midnight',
-  'Excuses for why you\'re suddenly "busy"',
-  'Roommate rules that should be crimes',
-  'Search histories you\'d clear first',
-  'Items you don\'t want your parents finding',
-  'Kinks you\'d invent (name only)',
-  'Pickup lines that would get you banned',
+  // Desi Taboo (Hindi/Punjabi)
+  'Things you can\'t use as lube (desi edition)',
+  'Safe words that would make it worse (Hindi)',
+  'Places that are definitely not romantic (India)',
+  'Texts that should never be sent after midnight (Hinglish)',
+  'Excuses for why you\'re suddenly "busy" (desi style)',
+  'Roommate rules that should be crimes (PG/boys hostel)',
+  'Search histories you\'d clear first (Indian context)',
+  'Items you don\'t want your parents finding (desi edition)',
+  'Kinks you\'d invent (Hindi names only)',
+  'Pickup lines that would get you banned (Punjabi style)',
   
-  // Red flags & choices
-  'Icks that kill the vibe instantly',
-  'Green flags you pretend to have',
-  'Red flags you ignore anyway',
-  'Hobbies that sound hotter than they are',
-  'Phases you swear you\'re "over"',
-  'Dating app prompts that should be illegal',
-  'First-date questions you should never ask',
-  'Second-date tests you secretly run',
-  'Third-date expectations you\'ll never admit',
-  'Breakup lines no one should use',
+  // Desi Red Flags & Dating
+  'Icks that kill the vibe instantly (Indian dating)',
+  'Green flags you pretend to have (desi style)',
+  'Red flags you ignore anyway (Hinglish)',
+  'Hobbies that sound hotter than they are (India)',
+  'Phases you swear you\'re "over" (desi edition)',
+  'Dating app prompts that should be illegal (India)',
+  'First-date questions you should never ask (Hindi)',
+  'Second-date tests you secretly run (desi style)',
+  'Third-date expectations you\'ll never admit (Indian)',
+  'Breakup lines no one should use (Hinglish)',
   
-  // Party life chaos
-  'Shots you\'ll never touch again',
-  'Karaoke songs that ruin the mood',
-  'Hangover cures that definitely don\'t work',
-  'Bar bathroom confessions',
-  'Pre-game rituals you\'re oddly proud of',
-  'Drunk food orders you defend with honor',
-  'Party fouls (no bodily stuff)',
-  'Things you say when you want to Irish-exit',
-  'Lies to leave the after-party',
-  'Group chat messages that start a war',
+  // Desi Party Life
+  'Shots you\'ll never touch again (Indian parties)',
+  'Karaoke songs that ruin the mood (Bollywood)',
+  'Hangover cures that definitely don\'t work (desi)',
+  'Bar bathroom confessions (India)',
+  'Pre-game rituals you\'re oddly proud of (desi)',
+  'Drunk food orders you defend with honor (Indian)',
+  'Party fouls (no bodily stuff) (desi edition)',
+  'Things you say when you want to Irish-exit (Hindi)',
+  'Lies to leave the after-party (Indian style)',
+  'Group chat messages that start a war (desi)',
   
-  // Role-play & improv
-  'Safe-for-work code words for NSFW topics',
-  'Fake celeb couple names that shouldn\'t exist',
-  'Reality-show confessionals about last night',
-  'Villain origin stories that begin on a dating app',
-  'Clickbait headlines about your weekend',
-  'Florida-Man style headlines about your group',
-  'Dumb laws you\'d pass for dating apps',
-  'New emojis we desperately need (describe)',
-  'Tinder bios written by an enemy',
+  // Bollywood & Desi Culture
+  'Safe-for-work code words for NSFW topics (Hindi)',
+  'Fake Bollywood couple names that shouldn\'t exist',
+  'Reality-show confessionals about last night (Indian)',
+  'Villain origin stories that begin on a dating app (desi)',
+  'Clickbait headlines about your weekend (Hindi)',
+  'Desi-Man style headlines about your group',
+  'Dumb laws you\'d pass for dating apps (India)',
+  'New emojis we desperately need (describe in Hindi)',
+  'Tinder bios written by an enemy (desi style)',
   'Hinge prompts answered by your mom (nightmare version)',
   
-  // Objects & "nope" lists
-  'Household items that sound dirty but aren\'t',
-  'Foods that should never be involved (name only)',
-  'Outfits that turn a 10 into a 2',
-  'Fragrances that would empty a room',
-  'Gifts that guarantee a breakup',
-  'Playlist songs that kill the mood',
-  'Pet names that are instant turn-offs',
-  'Decor that screams "run"',
-  'Tattoo ideas you\'d regret forever',
-  'Things you should never say mid-kiss',
+  // Desi Objects & "Nope" Lists
+  'Household items that sound dirty but aren\'t (Hindi)',
+  'Foods that should never be involved (name only) (desi)',
+  'Outfits that turn a 10 into a 2 (Indian context)',
+  'Fragrances that would empty a room (desi)',
+  'Gifts that guarantee a breakup (Indian)',
+  'Playlist songs that kill the mood (Bollywood)',
+  'Pet names that are instant turn-offs (Hindi)',
+  'Decor that screams "run" (desi edition)',
+  'Tattoo ideas you\'d regret forever (Indian)',
+  'Things you should never say mid-kiss (Hinglish)',
   
-  // 18+ Explicit
-  'Sex positions you\'d never try',
-  'Sex positions with funny names',
-  'Worst places to get caught',
-  'Things to never say during sex',
-  'Excuses for weird noises in bed',
-  'Things that sound sexy but aren\'t',
-  'Worst bedroom surprises',
-  'Failed sexy moves',
-  'Embarrassing turn-ons',
-  'Things you\'d never admit you\'re into',
+  // 18+ Explicit (Desi)
+  'Sex positions you\'d never try (Hindi names)',
+  'Sex positions with funny names (Punjabi)',
+  'Worst places to get caught (India)',
+  'Things to never say during sex (Hindi)',
+  'Excuses for weird noises in bed (desi)',
+  'Things that sound sexy but aren\'t (Hinglish)',
+  'Worst bedroom surprises (Indian)',
+  'Failed sexy moves (desi edition)',
+  'Embarrassing turn-ons (Hindi)',
+  'Things you\'d never admit you\'re into (Punjabi)',
   
-  // Hindi/Indian Slang (Gaaliya - Offensive)
+  // Hindi/Punjabi Slang & Gaaliya
   'Creative Hindi gaali combinations',
-  'Situations that deserve a gaali',
+  'Situations that deserve a gaali (Hindi)',
   'Gaali that sounds like a compliment',
   'English words that sound like gaali',
   'Funniest way to insult someone in Hindi',
@@ -111,9 +111,80 @@ const ALL_CATEGORY_PROMPTS = [
   'Things your mom says instead of gaali',
   'Passive-aggressive Indian insults',
   'Desi ways to tell someone off',
-  'Hindi phrases foreigners should never say'
+  'Hindi phrases foreigners should never say',
+  
+  // Punjabi Special
+  'Punjabi pickup lines that would get you slapped',
+  'Things you can say to a Sardar AND to your crush',
+  'Punjabi gaaliya that sound like compliments',
+  'Things your Punjabi mom says instead of swearing',
+  'Punjabi wedding traditions that are basically foreplay',
+  'Things you can say at a Punjabi wedding AND in bed',
+  'Punjabi food items that sound dirty',
+  'Punjabi dance moves that are basically mating calls',
+  'Things you can say to a Punjabi uncle AND to your date',
+  'Punjabi phrases that foreigners should never say',
+  
+  // South Indian Special
+  'Tamil pickup lines that would get you banned',
+  'Things you can say to a South Indian AND to your crush',
+  'Malayalam phrases that sound like gaali',
+  'Telugu words that foreigners should never say',
+  'Kannada expressions that are basically insults',
+  'South Indian wedding traditions that are foreplay',
+  'Things you can say at a South Indian wedding AND in bed',
+  'South Indian food items that sound dirty',
+  'South Indian dance moves that are mating calls',
+  'Things you can say to a South Indian uncle AND to your date',
+  
+  // Mumbai Special
+  'Mumbai pickup lines that would get you slapped',
+  'Things you can say to a Mumbaikar AND to your crush',
+  'Mumbai slang that sounds like gaali',
+  'Things your Mumbai mom says instead of swearing',
+  'Mumbai local train experiences that are foreplay',
+  'Things you can say on Mumbai local AND in bed',
+  'Mumbai street food that sounds dirty',
+  'Mumbai dance moves that are mating calls',
+  'Things you can say to a Mumbai uncle AND to your date',
+  'Mumbai phrases that foreigners should never say',
+  
+  // Delhi Special
+  'Delhi pickup lines that would get you banned',
+  'Things you can say to a Delhiite AND to your crush',
+  'Delhi slang that sounds like gaali',
+  'Things your Delhi mom says instead of swearing',
+  'Delhi metro experiences that are foreplay',
+  'Things you can say on Delhi metro AND in bed',
+  'Delhi street food that sounds dirty',
+  'Delhi dance moves that are mating calls',
+  'Things you can say to a Delhi uncle AND to your date',
+  'Delhi phrases that foreigners should never say',
+  
+  // Bengali Special
+  'Bengali pickup lines that would get you slapped',
+  'Things you can say to a Bengali AND to your crush',
+  'Bengali phrases that sound like gaali',
+  'Things your Bengali mom says instead of swearing',
+  'Bengali wedding traditions that are foreplay',
+  'Things you can say at a Bengali wedding AND in bed',
+  'Bengali food items that sound dirty',
+  'Bengali dance moves that are mating calls',
+  'Things you can say to a Bengali uncle AND to your date',
+  'Bengali phrases that foreigners should never say',
+  
+  // Gujarati Special
+  'Gujarati pickup lines that would get you banned',
+  'Things you can say to a Gujarati AND to your crush',
+  'Gujarati slang that sounds like gaali',
+  'Things your Gujarati mom says instead of swearing',
+  'Gujarati wedding traditions that are foreplay',
+  'Things you can say at a Gujarati wedding AND in bed',
+  'Gujarati food items that sound dirty',
+  'Gujarati dance moves that are mating calls',
+  'Things you can say to a Gujarati uncle AND to your date',
+  'Gujarati phrases that foreigners should never say'
 ];
-
 const CategoryGameSetup: React.FC<CategoryGameSetupProps> = ({ onStartGame, onBack }) => {
   // Load player names from localStorage (shared with Imposter game)
   const [playerNames] = useState<string[]>(() => {
@@ -420,4 +491,7 @@ const CategoryGameSetup: React.FC<CategoryGameSetupProps> = ({ onStartGame, onBa
 };
 
 export default CategoryGameSetup;
+
+
+
 
