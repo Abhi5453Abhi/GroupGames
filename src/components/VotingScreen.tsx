@@ -152,7 +152,7 @@ const VotingScreen: React.FC<VotingScreenProps> = ({
           onClick={handleSubmitVote}
           className="w-full bg-gradient-to-r from-accent-purple to-light-purple rounded-2xl py-4 text-white font-bold text-xl shadow-lg hover:shadow-purple-glow transition-all duration-300 transform hover:scale-105"
         >
-          {currentVoterIndex < players.length - 1 ? 'Submit Vote' : 'Complete Voting'}
+          {currentVoterIndex < players.length - 1 ? 'Submit Vote' : 'Reveal Results'}
         </button>
       )}
 

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import MainMenu from './components/MainMenu';
 import GameSetup from './components/GameSetup';
 import PlayerOverview from './components/PlayerOverview';
 import WordReveal from './components/WordReveal';
+import VotingPhase from './components/VotingPhase';
 import VotingScreen from './components/VotingScreen';
 import ResultsScreen from './components/ResultsScreen';
 import CategoryGameSetup from './components/CategoryGameSetup';
@@ -15,6 +17,7 @@ export type GameState =
   | 'game-setup'
   | 'player-overview'
   | 'word-reveal'
+  | 'voting-phase'
   | 'voting'
   | 'results'
   | 'category-setup'
@@ -257,7 +260,7 @@ function App() {
             currentPlayerIndex={currentPlayerIndex}
             onNextPlayer={(index) => {
               if (index >= players.length) {
-                setGameState('voting');
+                setGameState('voting-phase');
               } else {
                 setCurrentPlayerIndex(index);
               }
@@ -274,6 +277,14 @@ function App() {
             }}
             gameWord={gameWord}
             gameHint={gameHint}
+          />
+        );
+      case 'voting-phase':
+        return (
+          <VotingPhase
+            players={players}
+            onStartVoting={() => setGameState('voting')}
+            onBack={() => setGameState('player-overview')}
           />
         );
       case 'voting':
@@ -355,6 +366,7 @@ function App() {
   return (
     <div className="min-h-screen bg-dark-purple text-white">
       {renderCurrentScreen()}
+      <Analytics />
     </div>
   );
 }
